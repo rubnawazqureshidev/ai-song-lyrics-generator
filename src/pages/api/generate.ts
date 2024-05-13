@@ -4,8 +4,6 @@ import OpenAI from 'openai';
 const openai = new OpenAI();
 
 
-export const runtime = 'edge'
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if(req.method !== "POST") {
