@@ -51,7 +51,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex mt-5">
+    <main className="flex flex-wrap w-full mt-5">
       <div className="mb-5 px-4  w-full lg:w-6/12">
         <div className="bg-cyan-50 p-4 rounded-md">
           <div className="flex gap-4 items-center mb-2">
@@ -69,7 +69,7 @@ export default function Home() {
               }`}
             >
               <Image src="/chill-out.png" width={38} height={38} alt="Chill" />
-              <p className="font-semibold text-xl">Chill</p>
+              <p className="font-semibold text-sm lg:text-xl">Chill</p>
             </div>
 
             <div
@@ -79,7 +79,7 @@ export default function Home() {
               }`}
             >
               <Image src="/fire.png" width={38} height={38} alt="Hip-Hop" />
-              <p className="font-semibold text-xl">Hip-Hop</p>
+              <p className="font-semibold text-sm lg:text-xl">Hip-Hop</p>
             </div>
 
             <div
@@ -89,7 +89,7 @@ export default function Home() {
               }`}
             >
               <Image src="/robot.png" width={38} height={38} alt="robot" />
-              <p className="font-semibold text-xl">Electronic</p>
+              <p className="font-semibold text-sm lg:text-xl">Electronic</p>
             </div>
 
             <div
@@ -99,7 +99,7 @@ export default function Home() {
               }`}
             >
               <Image src="/guitar.png" width={38} height={38} alt="rock" />
-              <p className="font-semibold text-xl">Rock</p>
+              <p className="font-semibold text-sm lg:text-xl">Rock</p>
             </div>
 
             <div
@@ -109,7 +109,7 @@ export default function Home() {
               }`}
             >
               <Image src="/dance.png" width={38} height={38} alt="dance" />
-              <p className="font-semibold text-xl">Dance</p>
+              <p className="font-semibold text-sm lg:text-xl">Dance</p>
             </div>
           </div>
 
