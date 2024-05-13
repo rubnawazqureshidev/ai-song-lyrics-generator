@@ -1,118 +1,149 @@
-import Image from "next/image";
 import { Inter } from "next/font/google";
+import axios from "axios";
+import { useState } from "react";
+import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [phrases, setphrases] = useState("");
+  const [lyricsStyle, setLyricsStyle] = useState("Chill");
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState("");
+
+  const generate = async () => {
+    try {
+      setIsLoading(true);
+      const body = {
+        prompt: `Generate song script for singer, who want to sing the song, and singer's style  is ${lyricsStyle} ${
+          phrases !== "" && "and use these info for generate song script."
+        }`,
+      };
+
+      const response = await fetch("/api/generate", {
+        body: JSON.stringify(body, null),
+        method: "POST",
+      });
+      const stream: any = response.body;
+
+      // You can process the stream as needed, for example:
+      const reader = stream.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = new TextDecoder("utf-8").decode(value);
+        console.log("Received chunk:", text);
+
+        if (text.includes("END STREAMS")) {
+        } else {
+          console.log(text);
+          setResult((result) => result + text);
+        }
+      }
+
+      setphrases("");
+      setLyricsStyle("Pop");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="flex mt-5">
+      <div className="mb-5 px-4  w-full lg:w-6/12">
+        <div className="bg-cyan-50 p-4 rounded-md">
+          <div className="flex gap-4 items-center mb-2">
+            <div className=" bg-cyan-500 rounded-full h-12 w-12 flex items-center justify-center">
+              <div className="font-semibold text-white text-2xl">1</div>
+            </div>
+            <p className="mb-1 text-3xl font-extrabold">Select a vibe</p>
+          </div>
+
+          <div className="flex flex-wrap justify-between items-center mb-5 space-x-3 mt-5">
+            <div
+              onClick={() => setLyricsStyle("Chill")}
+              className={`border-2 rounded-3xl h-28 items-center flex flex-col justify-center text-center shadow-lg cursor-pointer w-2/12 ${
+                lyricsStyle === "Chill" ? "border-cyan-500" : ""
+              }`}
+            >
+              <Image src="/chill-out.png" width={38} height={38} alt="Chill" />
+              <p className="font-semibold text-xl">Chill</p>
+            </div>
+
+            <div
+              onClick={() => setLyricsStyle("Hip-Hop")}
+              className={`border-2 rounded-3xl h-28 items-center flex flex-col justify-center text-center shadow-lg cursor-pointer w-2/12 ${
+                lyricsStyle === "Hip-Hop" ? "border-cyan-500" : ""
+              }`}
+            >
+              <Image src="/fire.png" width={38} height={38} alt="Hip-Hop" />
+              <p className="font-semibold text-xl">Hip-Hop</p>
+            </div>
+
+            <div
+              onClick={() => setLyricsStyle("Electronic")}
+              className={`border-2 rounded-3xl h-28 items-center flex flex-col justify-center text-center shadow-lg cursor-pointer w-2/12 ${
+                lyricsStyle === "Electronic" ? "border-cyan-500" : ""
+              }`}
+            >
+              <Image src="/robot.png" width={38} height={38} alt="robot" />
+              <p className="font-semibold text-xl">Electronic</p>
+            </div>
+
+            <div
+              onClick={() => setLyricsStyle("Rock")}
+              className={`border-2 rounded-3xl h-28 items-center flex flex-col justify-center text-center shadow-lg cursor-pointer w-2/12 ${
+                lyricsStyle === "Rock" ? "border-cyan-500" : ""
+              }`}
+            >
+              <Image src="/guitar.png" width={38} height={38} alt="rock" />
+              <p className="font-semibold text-xl">Rock</p>
+            </div>
+
+            <div
+              onClick={() => setLyricsStyle("Dance")}
+              className={`border-2 rounded-3xl h-28 items-center flex flex-col justify-center text-center shadow-lg cursor-pointer w-2/12 ${
+                lyricsStyle === "Dance" ? "border-cyan-500" : ""
+              }`}
+            >
+              <Image src="/dance.png" width={38} height={38} alt="dance" />
+              <p className="font-semibold text-xl">Dance</p>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-center mb-2">
+            <div className=" bg-cyan-500 rounded-full h-12 w-12 flex items-center justify-center">
+              <div className="font-semibold text-white text-2xl">2</div>
+            </div>
+            <p className="mb-1 text-3xl font-extrabold">
+              Enter a prompt <span className="font-light">(optional)</span>
+            </p>
+          </div>
+
+          <textarea
+            value={phrases}
+            onChange={(e) => setphrases(e.target.value)}
+            rows={5}
+            className="w-full border py-2 px-4 mb-2"
+          ></textarea>
+
+          <button
+            onClick={generate}
+            disabled={isLoading}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl w-full text-xl"
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            {isLoading ? "Please wait" : "Generate"}
+          </button>
         </div>
+
+        <p className="mt-5 text-2xl font-semibold border-t-2 border-b-2 p-2 border-dotted mb-5">
+          Lyrics
+        </p>
+        <p style={{ whiteSpace: "pre-wrap" }}>{result}</p>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <div className="mb-5 px-4 my-4 w-full lg:w-6/12"></div>
     </main>
   );
 }
