@@ -2,14 +2,38 @@ import { Inter } from "next/font/google";
 import axios from "axios";
 import { useState } from "react";
 import Image from "next/image";
+import fileDownload from "js-file-download";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [artist, setArtist] = useState("");
+  const [writeStyle, setWritingStyle] = useState("");
   const [phrases, setphrases] = useState("");
   const [lyricsStyle, setLyricsStyle] = useState("Chill");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState("");
+  const [isPending, setIsPending] = useState(false);
+
+  function generatePDF() {
+    setIsPending(true);
+
+    axios
+      .post('https://stage-uxebo.ondigitalocean.app/api/v1/pdf-generate/lyrics', {
+        lyrics: result
+      }, {
+        responseType: "blob",
+      })
+      .then(async (response) => {
+        fileDownload(response.data, 'lyrics.pdf');
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
+  }
 
   const generate = async () => {
     try {
@@ -17,7 +41,7 @@ export default function Home() {
       const body = {
         prompt: `Generate song script for singer, who want to sing the song, and singer's style  is ${lyricsStyle} ${
           phrases !== "" && "and use these info for generate song script."
-        }`,
+        } writing style is: ${writeStyle} and artist name is ${artist}`,
       };
 
       const response = await fetch("/api/generate", {
@@ -57,6 +81,37 @@ export default function Home() {
           <div className="flex gap-4 items-center mb-2">
             <div className=" bg-cyan-500 rounded-full h-12 w-12 flex items-center justify-center">
               <div className="font-semibold text-white text-2xl">1</div>
+            </div>
+            <p className="mb-1 text-3xl font-extrabold">Artist</p>
+          </div>
+
+          <input
+            value={artist}
+            onChange={(e) => setArtist(e.target.value)}
+            className="w-full border py-2 px-4 mb-2"
+          />
+
+          <div className="flex gap-4 items-center mb-2">
+            <div className=" bg-cyan-500 rounded-full h-12 w-12 flex items-center justify-center">
+              <div className="font-semibold text-white text-2xl">2</div>
+            </div>
+            <p className="mb-1 text-3xl font-extrabold">Writing Style</p>
+          </div>
+
+          <select onChange={(e) => setWritingStyle(e.target.value)} className="w-full border py-2 px-4 mb-2">
+              <option>
+                Happy
+              </option>
+
+              <option>
+                Sad
+              </option>
+          </select>
+
+
+          <div className="flex gap-4 items-center mb-2">
+            <div className=" bg-cyan-500 rounded-full h-12 w-12 flex items-center justify-center">
+              <div className="font-semibold text-white text-2xl">3</div>
             </div>
             <p className="mb-1 text-3xl font-extrabold">Select a vibe</p>
           </div>
@@ -115,7 +170,7 @@ export default function Home() {
 
           <div className="flex gap-4 items-center mb-2">
             <div className=" bg-cyan-500 rounded-full h-12 w-12 flex items-center justify-center">
-              <div className="font-semibold text-white text-2xl">2</div>
+              <div className="font-semibold text-white text-2xl">4</div>
             </div>
             <p className="mb-1 text-3xl font-extrabold">
               Enter a prompt <span className="font-light">(optional)</span>
@@ -141,9 +196,20 @@ export default function Home() {
         <p className="mt-5 text-2xl font-semibold border-t-2 border-b-2 p-2 border-dotted mb-5">
           Lyrics
         </p>
-        <p style={{ whiteSpace: "pre-wrap" }}>{result}</p>
+        <textarea onChange={(e) => setResult(e.target.value)} value={result} className="w-full p-4 border-2 border-dotted focus:outline-none" rows={20}  style={{ whiteSpace: "pre-wrap" }}/>
+
+
+          <button
+            onClick={generatePDF}
+            disabled={isPending}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl w-full text-xl"
+          >
+            {isLoading ? "Please wait" : "Download PDF"}
+          </button>
       </div>
-      <div className="mb-5 px-4 my-4 w-full lg:w-6/12"></div>
+      <div className="mb-5 px-4 my-4 w-full lg:w-6/12">
+
+      </div>
     </main>
   );
 }
